@@ -152,17 +152,19 @@ end_report = config.getboolean("debug", "end_report", fallback=False)
 save_failed = config.getboolean("snapshots", "save_failed", fallback=False)
 save_successful = config.getboolean("snapshots", "save_successful", fallback=False)
 gtk_stdout = config.getboolean("debug", "gtk_stdout", fallback=False)
+auth_ui = config.getboolean("core", "auth_ui", fallback=True)
 rotate = config.getint("video", "rotate", fallback=0)
 
 # Send the gtk output to the terminal if enabled in the config
 gtk_pipe = sys.stdout if gtk_stdout else subprocess.DEVNULL
 
-# Start the auth ui, register it to be always be closed on exit
-try:
-	gtk_proc = subprocess.Popen(["howdy-gtk", "--start-auth-ui"], stdin=subprocess.PIPE, stdout=gtk_pipe, stderr=gtk_pipe)
-	atexit.register(exit)
-except FileNotFoundError:
-	pass
+# Start the auth ui if enabled, register it to be always be closed on exit
+if auth_ui:
+	try:
+		gtk_proc = subprocess.Popen(["howdy-gtk", "--start-auth-ui"], stdin=subprocess.PIPE, stdout=gtk_pipe, stderr=gtk_pipe)
+		atexit.register(exit)
+	except FileNotFoundError:
+		pass
 
 # Write to the stdin to redraw ui
 send_to_ui("M", _("Starting up..."))
